@@ -3,14 +3,20 @@ import fs from "fs";
 
 const sleep = s => new Promise(r => setTimeout(r, s*1000))
 
-async function accessImage(page, extention){
-  let imgURL = "https://www.nasa.gov" + extention
-  console.log(imgURL)
-  page.goto(imgURL, {waitUntil:"domcontentloaded"});
+async function accessImage(page, extention, index){
+  let imgUrl = "https://www.nasa.gov" + extention
+  let imgPath = "./Images/nasaIMG_"+ index + ".png"
 
-  await sleep(15)
+  console.log(imgUrl)
+  page.goto(imgUrl, {waitUntil:"domcontentloaded"});
+
+  await sleep(2)
+
+  const element = await page.$('body > img');        // declare a variable with an ElementHandle
+  await element.screenshot({path: imgPath})
 }
 async function scrape(url) {
+  let imgId = 1
     const browser = await puppeteer.launch({
       headless: false,
       defaultViewport: null,
@@ -38,7 +44,8 @@ async function scrape(url) {
     });
 
     for (let image of images) {
-      await accessImage(page, image["imgSrc"]);
+      await accessImage(page, image["imgSrc"], imgId);
+      imgId += 1
     }
 
     await browser.close();
